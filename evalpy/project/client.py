@@ -121,6 +121,21 @@ class Client:
         if step_forward:
             self.forward_step()
 
+    def log_artifact(self, artifact, artifact_name):
+        """
+        Pickles an object onto disk instead of into the database. This is aware of the current step, so filenames do not need to be different between steps.
+
+        :param artifact: The object that is to be pickled
+        :param step_forward: The filename of the object.
+        """
+
+        artifact_dir_path = os.path.join(self.project_root, self.project_name, self.active_run_id,
+                                        str(len(self.run_step_entry_dicts) - 1))
+        os.makedirs(artifact_dir_path, exist_ok=True)
+
+        with open(os.path.join(artifact_dir_path, artifact_name), "wb") as artifact_file:
+            pickle.dump(artifact, artifact_file)
+
     def delete_experiment(self, experiment_name: str):
         run_ids = self.get_runs_by_experiment_names([experiment_name])
         where_filter = sql_utilities.sql_where_filter(sql_utilities.SQLJunction.NONE, 'experiment_name',
