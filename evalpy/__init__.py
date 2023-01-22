@@ -7,6 +7,7 @@ end_run = __client.end_run
 set_project = __client.set_project
 log_run_entries = __client.log_entries
 log_run_step = __client.log_step
+log_torch_network = __client.log_torch_network
 forward_run_step = __client.forward_step
 delete_experiment = __client.delete_experiment
 delete_run = __client.delete_run

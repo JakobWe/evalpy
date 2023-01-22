@@ -21,8 +21,8 @@ setuptools.setup(
     ],
     install_requires=[
         'click>=7.0',
-        'pyqt5>=5.9.2',
-        'pyqtgraph>=0.10.0',
+        # 'pyqt5>=5.15.6',
+        # 'pyqtgraph>=0.11.1',
         'pandas>=0.23.0'
     ],
     python_requires='>=3.6',

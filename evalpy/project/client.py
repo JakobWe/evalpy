@@ -43,7 +43,8 @@ class Client:
         self.project_root = root
         self.project_name = name
         os.makedirs(os.path.join(root, name), exist_ok=True)
-        self.db_connection = sql_utilities.establish_connection(os.path.join(root, name, self.database_file))
+        self.db_connection = sql_utilities.establish_connection(
+            os.path.join(root, name, self.database_file))
 
     def start_run(self, experiment_name: Optional[str] = None):
         """
@@ -57,7 +58,8 @@ class Client:
         :return: The Client object
         """
         if self.active_run_id is not None:
-            raise Exception('There is already an active run ongoing. Please finish it before starting another run.')
+            raise Exception(
+                'There is already an active run ongoing. Please finish it before starting another run.')
         self.experiment_name = experiment_name or self.experiment_name or 'default'
         self.active_run_id = 't' + str(uuid.uuid4()).replace('-', '_')
         sql_utilities.create_run_table(self.db_connection, self.active_run_id)
@@ -72,9 +74,11 @@ class Client:
         """
         final_entry_dict = {'run_id': self.active_run_id, 'experiment_name': self.experiment_name,
                             **self.run_entry_dict}
-        sql_utilities.add_row_to_main_table(self.db_connection, final_entry_dict)
+        sql_utilities.add_row_to_main_table(
+            self.db_connection, final_entry_dict)
         for entry in self.run_step_entry_dicts[:-1]:
-            sql_utilities.add_row_to_run_table(self.db_connection, self.active_run_id, entry)
+            sql_utilities.add_row_to_run_table(
+                self.db_connection, self.active_run_id, entry)
         self.db_connection.commit()
         self.active_run_id = None
         self.run_entry_dict = None
@@ -88,7 +92,8 @@ class Client:
         :param entry_dict: A dictionary of values that should be recorded once per run
         """
         if not isinstance(entry_dict, dict):
-            raise TypeError('Expected a Dictionary to add entries to the current run')
+            raise TypeError(
+                'Expected a Dictionary to add entries to the current run')
         if self.active_run_id is None:
             raise Exception("No active run ongoing")
         converted_dict = self._convert_dict(entry_dict)
@@ -111,13 +116,17 @@ class Client:
         :param step_forward: If True the method forward_step() will be called
         """
         if not isinstance(entry_dict, dict):
-            raise TypeError('Expected a Dictionary to add entries to the current run')
+            raise TypeError(
+                'Expected a Dictionary to add entries to the current run')
         if self.active_run_id is None:
             raise Exception("No active run ongoing")
         converted_dict = self._convert_dict(entry_dict)
         self.run_step_entry_dicts[-1].update(converted_dict)
         if step_forward:
             self.forward_step()
+
+    def log_torch_network(self, network, name):
+        pass
 
     def commit_current_run_progress(self):
         """
@@ -127,7 +136,8 @@ class Client:
         if self.active_run_id is None:
             raise Exception("No active run ongoing")
         for entry in self.run_step_entry_dicts[:-1]:
-            sql_utilities.add_row_to_run_table(self.db_connection, self.active_run_id, entry)
+            sql_utilities.add_row_to_run_table(
+                self.db_connection, self.active_run_id, entry)
         self.db_connection.commit()
         self.run_step_entry_dicts = [{}]
 
@@ -135,7 +145,8 @@ class Client:
         columns = columns or self.column_names_of_experiments()
         where_filter = sql_utilities.sql_where_filter(sql_utilities.SQLJunction.NONE, 'run_id',
                                                       sql_utilities.SQLOperator.EQUALS, run_id, False, False)
-        values = sql_utilities.get_column_values_filtered(self.db_connection, columns, 'params', [where_filter])
+        values = sql_utilities.get_column_values_filtered(
+            self.db_connection, columns, 'params', [where_filter])
         return values
 
     def delete_experiment(self, experiment_name: str):
@@ -162,7 +173,8 @@ class Client:
 
     def get_runs_by_experiment_names(self, experiment_names: List[str]):
         where_filters = [sql_utilities.sql_where_filter(sql_utilities.SQLJunction.NONE, 'experiment_name',
-                                                        sql_utilities.SQLOperator.EQUALS, experiment_names[0], False,
+                                                        sql_utilities.SQLOperator.EQUALS, experiment_names[
+                                                            0], False,
                                                         False)]
 
         where_filters.extend([sql_utilities.sql_where_filter(sql_utilities.SQLJunction.OR, 'experiment_name',
@@ -178,10 +190,11 @@ class Client:
                 junction = sql_utilities.SQLJunction.AND if idx == 0 else sql_utilities.SQLJunction.OR
                 name_filter.append(sql_utilities.sql_where_filter(junction, 'experiment_name',
                                                                   sql_utilities.SQLOperator.EQUALS, name, idx == 0,
-                                                                  idx == (len(experiment_names)-1)))
+                                                                  idx == (len(experiment_names) - 1)))
         else:
             name_filter = [sql_utilities.sql_where_filter(sql_utilities.SQLJunction.NONE, 'experiment_name',
-                                                          sql_utilities.SQLOperator.EQUALS, experiment_names[0], False,
+                                                          sql_utilities.SQLOperator.EQUALS, experiment_names[
+                                                              0], False,
                                                           False)]
 
             name_filter.extend([sql_utilities.sql_where_filter(sql_utilities.SQLJunction.OR, 'experiment_name',
